@@ -1,0 +1,7 @@
+CREATE OR REPLACE VIEW CustomerBook AS
+SELECT
+    title,
+    author,
+    genre,
+    iszero(available_copies) AS availability
+FROM Books;
