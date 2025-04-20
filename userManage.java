@@ -47,7 +47,7 @@ class Member {
     }
 }
 
-class dbsConnect {
+class dbsConnecting {
     private static Map<String, Member> membersData = new HashMap<>();
 
     public static void DB_Info() {
@@ -119,7 +119,7 @@ public class userManage {
     public Scene userManageScene(Stage stage) {
         stage.setTitle("👥 Admin - Manage Users");
 
-        dbsConnect.DB_Info();
+        dbsConnecting.DB_Info();
         List<Member> members = getSortedMembers();
 
         VBox userListVBox = new VBox(10);
@@ -176,7 +176,7 @@ public class userManage {
     }
 
     private List<Member> getSortedMembers() {
-        List<Member> sorted = new ArrayList<>(dbsConnect.getMembersData().values());
+        List<Member> sorted = new ArrayList<>(dbsConnecting.getMembersData().values());
         sorted.sort((b1, b2) -> {
             try {
                 return Integer.compare(Integer.parseInt(b1.getmemId()), Integer.parseInt(b2.getmemId()));
@@ -197,8 +197,7 @@ public class userManage {
                 createLabel("Phone", 100, true),
                 createLabel("Membership", 100, true),
                 createLabel("Reg. Date", 100, true),
-                createLabel("Ban", 80, true),
-                createLabel("Update Name", 100, true)  // New label for updating name
+                createLabel("Ban", 80, true) // New label for updating name
         );
         return header;
     }
@@ -214,37 +213,18 @@ public class userManage {
         banBtn.setOnAction(e -> {
             System.out.println("User " + member.getNme() + " has been banned.");
             dbDelete.DB_delete(member.getmemId());
-            dbsConnect.getMembersData().remove(member.getmemId());
+            dbsConnecting.getMembersData().remove(member.getmemId());
             userListVBox.getChildren().setAll(header);
             getSortedMembers().forEach(m -> userListVBox.getChildren().add(createUserRow(m, userListVBox, header)));
         });
 
-        Button updateBtn = createStyledButton("✏️ Update", "#f1faee", "#4caf50");
-        updateBtn.setOnAction(e -> {
-            TextField newNameField = new TextField(member.getNme());
-            newNameField.setPromptText("Enter new name");
-            Button confirmBtn = createStyledButton("Update", "#2f3e46", "#52796f");
 
-            confirmBtn.setOnAction(event -> {
-                String newName = newNameField.getText().trim();
-                if (!newName.isEmpty()) {
-                    member.setName(newName);
-                    dbDelete.DB_delete(member.getmemId());  // Delete old entry
-                    // You would typically update the DB with the new name here
-                    dbsConnect.getMembersData().put(member.getmemId(), member);
-                    userListVBox.getChildren().setAll(header);
-                    getSortedMembers().forEach(m -> userListVBox.getChildren().add(createUserRow(m, userListVBox, header)));
-                }
-            });
 
-            VBox updateBox = new VBox(10, newNameField, confirmBtn);
-            updateBox.setAlignment(Pos.CENTER);
-            updateBox.setPadding(new Insets(20));
 
-            Stage updateStage = new Stage();
-            updateStage.setScene(new Scene(updateBox, 300, 200));
-            updateStage.show();
-        });
+
+
+
+
 
         row.getChildren().addAll(
                 createLabel(member.getmemId(), 50, false),
@@ -253,8 +233,7 @@ public class userManage {
                 createLabel(member.getPhone(), 100, false),
                 createLabel(member.getType(), 100, false),
                 createLabel(member.getDate(), 100, false),
-                banBtn,
-                updateBtn  // Add button to update name
+                banBtn// Add button to update name
         );
         return row;
     }
