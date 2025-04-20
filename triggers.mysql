@@ -1,0 +1,43 @@
+DELIMITER $$
+
+CREATE TRIGGER transac_to_book
+BEFORE INSERT ON Transactions
+FOR EACH ROW
+BEGIN
+    DECLARE avc INT;
+    SELECT available_copies INTO avc FROM Books WHERE book_id = NEW.book_id FOR UPDATE;
+    IF avc > 0 THEN
+        UPDATE Books SET available_copies = available_copies - 1 WHERE book_id = NEW.book_id;
+    ELSE
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'No available copies!';
+    END IF;
+END$$
+
+DELIMITER ;
+
+DELIMITER $$
+
+CREATE TRIGGER phone_no_err
+BEFORE INSERT ON Members
+FOR EACH ROW
+BEGIN
+    IF LENGTH(NEW.phone_number) < 10 THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Invalid Phone Number!';
+    END IF;
+END$$
+
+DELIMITER ;
+
+DELIMITER $$
+
+CREATE TRIGGER valid_email
+BEFORE INSERT ON Members
+FOR EACH ROW
+BEGIN
+    IF NEW.email NOT REGEXP '^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$' THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Invalid Email!';
+    END IF;
+END$$
+
+DELIMITER ;
+
