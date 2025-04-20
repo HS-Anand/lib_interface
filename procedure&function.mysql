@@ -1,0 +1,40 @@
+DELIMITER $$
+
+CREATE or replace PROCEDURE bookinserts(
+    IN bid VARCHAR(20),
+    IN bt VARCHAR(255),
+    IN bat VARCHAR(255),
+    IN bge VARCHAR(100),
+    IN bisbn VARCHAR(20),
+    IN bpy INT,
+    IN btc INT,
+    IN bavc INT
+)
+BEGIN
+    DECLARE book_exists INT;
+
+    SELECT COUNT(*) INTO book_exists FROM Books WHERE book_id = bid;
+
+    IF book_exists > 0 THEN
+        UPDATE Books 
+        SET total_copies = total_copies + btc, 
+            available_copies = available_copies + bavc
+        WHERE book_id = bid;
+    ELSE
+        INSERT INTO Books (book_id, title, author, genre, isbn, publication_year, total_copies, available_copies)
+        VALUES (bid, bt, bat, bge, bisbn, bpy, btc, bavc);
+    END IF;
+END$$
+
+DELIMITER ;
+
+
+DELIMITER $$
+
+CREATE FUNCTION iszero(avc INT) RETURNS TINYINT(1)
+DETERMINISTIC
+BEGIN
+    RETURN IF(avc = 0, 0, 1);
+END$$
+
+DELIMITER ;
