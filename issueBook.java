@@ -1,5 +1,6 @@
 package cms;
 
+import cms.DataKeys;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -44,10 +45,10 @@ class Member1 {
     }
 }
 
-class dbsCONNECT {
-    private static final String url = "your_database_url";
-    private static final String user = "your_database_user";
-    private static final String password = "your_database_password";
+class dbsConnect1 {
+    private static final String url = DataKeys.url;
+    private static final String user = DataKeys.user;
+    private static final String password = DataKeys.password;
 
     public static Books getBookInfo(String bookId) {
         try (Connection con = DriverManager.getConnection(url, user, password)) {
@@ -104,7 +105,7 @@ class dbsCONNECT {
 
     public static boolean insertIssuedBook(int memberId, String bookId, LocalDate issueDate, LocalDate dueDate) {
         try (Connection con = DriverManager.getConnection(url, user, password)) {
-            String query = "INSERT INTO IssuedBooks (member_id, book_id, issue_date, due_date) VALUES (?, ?, ?, ?)";
+            String query = "INSERT INTO transactions(member_id, book_id, issue_date, due_date) VALUES (?, ?, ?, ?)";
             PreparedStatement stmt = con.prepareStatement(query);
             stmt.setInt(1, memberId);
             stmt.setString(2, bookId);
@@ -121,7 +122,7 @@ class dbsCONNECT {
 
 public class issueBook {
     public Scene issueBookScene(Stage stage) {
-        stage.setTitle("📚 Admin - Issue Book");
+        stage.setTitle("📤 Admin - Issue Book");
 
         VBox centerBox = new VBox(20);
         centerBox.setPadding(new Insets(40));
@@ -156,8 +157,8 @@ public class issueBook {
             try {
                 int memberId = Integer.parseInt(memberIdText);
 
-                Books book = dbsCONNECT.getBookInfo(bookId);
-                Member1 member = dbsCONNECT.getMemberInfo(memberId);
+                Books book = dbsConnect1.getBookInfo(bookId);
+                Member1 member = dbsConnect1.getMemberInfo(memberId);
 
                 if (book == null) {
                     notification.setText("❌ Book not found.");
@@ -177,17 +178,17 @@ public class issueBook {
                     return;
                 }
 
-                if (member.issuedBookIds.size() >= 3) {
+                /*if (member.issuedBookIds.size() >= 3) {
                     notification.setText("❌ Member already has 3 books issued.");
                     notification.setStyle("-fx-text-fill: red;");
                     return;
-                }
+                }*/
 
                 // Issue process
-                member.issuedBookIds.add(book.getBookId());
+                //member.issuedBookIds.add(book.getBookId());
                 int newAvailableCopies = book.getAvailableCopies() - 1;
 
-                boolean updated = dbsCONNECT.updateAvailableCopies(book.getBookId(), newAvailableCopies);
+                boolean updated = dbsConnect1.updateAvailableCopies(book.getBookId(), newAvailableCopies);
                 if (!updated) {
                     notification.setText("❌ Failed to update book availability.");
                     notification.setStyle("-fx-text-fill: red;");
@@ -197,7 +198,7 @@ public class issueBook {
                 LocalDate issueDate = LocalDate.now();
                 LocalDate dueDate = issueDate.plusDays(14);
 
-                boolean inserted = dbsCONNECT.insertIssuedBook(memberId, bookId, issueDate, dueDate);
+                boolean inserted = dbsConnect1.insertIssuedBook(memberId, bookId, issueDate, dueDate);
                 if (!inserted) {
                     notification.setText("❌ Failed to record issued book.");
                     notification.setStyle("-fx-text-fill: red;");
