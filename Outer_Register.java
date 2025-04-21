@@ -169,10 +169,24 @@ public class Outer_Register {
                 pstmt.setString(3, phone);
                 pstmt.setString(4, membershipType);
                 pstmt.setDate(5, Date.valueOf(LocalDate.now()));
-                pstmt.setString(6, password); // Note: Plaintext password
+                pstmt.setString(6, password); // Plaintext — should hash in real applications
 
                 int rowsAffected = pstmt.executeUpdate();
                 pstmt.close();
+
+                // Now fetch the auto-generated member_id
+                String fetchIdSQL = "SELECT member_id FROM Members WHERE email = ?";
+                PreparedStatement fetchStmt = con.prepareStatement(fetchIdSQL);
+                fetchStmt.setString(1, email);
+                ResultSet rs = fetchStmt.executeQuery();
+
+                String memberId = "N/A";
+                if (rs.next()) {
+                    memberId = rs.getString("member_id");
+                }
+
+                rs.close();
+                fetchStmt.close();
                 con.close();
 
                 if (rowsAffected > 0) {
@@ -180,7 +194,8 @@ public class Outer_Register {
                     successAlert.setTitle("Registration Successful");
                     successAlert.setHeaderText("Welcome to the Library!");
                     successAlert.setContentText(
-                            "Name: " + name + "\n" +
+                            "🎉 Your Username: " + memberId + "\n\n" +
+                                    "Name: " + name + "\n" +
                                     "Email: " + email + "\n" +
                                     "Phone: " + phone + "\n" +
                                     "Membership Type: " + membershipType + "\n" +
